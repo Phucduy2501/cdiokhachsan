@@ -1,5 +1,7 @@
-import "./Login.css";
 
+import "./Login.css";
+import Register from "../register/register";
+import { Link } from "react-router-dom";
 
 function Login() {
   return (
@@ -26,8 +28,8 @@ function Login() {
         <button className="login-btn">Đăng Nhập</button>
 
         <div className="login-links">
-          <a href="/register">Đăng Ký</a>
-          <a href="/forgot-password">Quên Mật Khẩu</a>
+          <Link to="/register">Đăng Ký</Link>
+          <Link to="/forgot-password">Quên Mật Khẩu</Link>
         </div>
       </div>
     </div>

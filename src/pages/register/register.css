@@ -78,7 +78,7 @@
 .login-links {
     margin-top: 20px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
 }
 
 .login-links a {

@@ -1,4 +1,5 @@
 import "./register.css";
+import { Link } from "react-router-dom";
 
 function Register() {
   return (
@@ -9,28 +10,48 @@ function Register() {
           alt="Hotel"
         />
       </div>
+
       <div className="login-form">
-        <h2>Đăng Nhập Tài Khoản</h2>
+        <h2>Đăng ký Tài Khoản</h2>
 
         <div className="form-group">
-          <label>Tên Tài Khoản</label>
+          <label>Số căn cước</label>
+          <input type="text" placeholder="Số căn cước" />
+        </div>
+
+        <div className="form-group">
+          <label>Họ và tên</label>
+          <input type="text" placeholder="Họ tên đầy đủ" />
+        </div>
+
+        <div className="form-group">
+          <label>Tên đăng nhập</label>
           <input type="text" placeholder="Tên người dùng" />
         </div>
 
         <div className="form-group">
           <label>Mật khẩu</label>
-          <input type="password" placeholder="vui lòng nhập mật khẩu" />
+          <input type="password" placeholder="Nhập mật khẩu" />
         </div>
 
-        <button className="login-btn">Đăng Nhập</button>
+        <div className="form-group">
+          <label>Nhập lại mật khẩu</label>
+          <input type="password" placeholder="Nhập lại mật khẩu" />
+        </div>
+
+        <div className="form-group">
+          <label>Số điện thoại</label>
+          <input type="text" placeholder="Số điện thoại" />
+        </div>
+
+        <button className="login-btn">Đăng ký</button>
 
         <div className="login-links">
-          <a href="/register">Đăng Ký</a>
-          <a href="/forgot-password">Quên Mật Khẩu</a>
+          <Link to="/login">Đăng nhập</Link>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Register;
