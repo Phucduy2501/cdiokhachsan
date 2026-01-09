@@ -1,15 +1,12 @@
-import "./register.css";
 import { Link } from "react-router-dom";
+import image from "../../assets/2.jpg";
 
 function Register() {
   return (
     <div className="login-container">
       <div className="login-image">
-        <img
-          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
-          alt="Hotel"
-        />
-      </div>
+              <img src={image} alt="Hotel" />
+            </div>
 
       <div className="login-form">
         <h2>Đăng ký Tài Khoản</h2>

@@ -1,16 +1,19 @@
 
 import "./Login.css";
-import Register from "../register/register";
 import { Link } from "react-router-dom";
+import image from "../../assets/2.jpg";
 
 function Login() {
   return (
     <div className="login-container">
-      <div className="login-image">
+      {/* <div className="login-image">
         <img
-          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+          src="/assets/2.jpg"
           alt="Hotel"
         />
+      </div> */}
+      <div className="login-image">
+        <img src={image} alt="Hotel" />
       </div>
       <div className="login-form">
         <h2>Đăng Nhập Tài Khoản</h2>
@@ -29,7 +32,7 @@ function Login() {
 
         <div className="login-links">
           <Link to="/register">Đăng Ký</Link>
-          <Link to="/forgot-password">Quên Mật Khẩu</Link>
+          <Link to="/password">Quên Mật Khẩu</Link>
         </div>
       </div>
     </div>
