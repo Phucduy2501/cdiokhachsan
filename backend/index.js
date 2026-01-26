@@ -184,3 +184,60 @@ app.post("/verify-otp", (req, res) => {
 app.listen(3000, () => {
     console.log("Server running at http://localhost:3000");
 });
+
+
+// ================= GET HOTELS (ADMIN) =================
+app.get("/api/hotels", (req, res) => {
+    const sql = `
+        SELECT
+            hotels.id,
+            users.name AS owner_name,
+            users.email AS owner_email,
+            hotels.name AS hotel_name,
+            hotels.created_at,
+            hotels.rating
+        FROM hotels
+        JOIN users ON hotels.owner_id = users.id
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.log("❌ Lỗi lấy hotels:", err);
+            return res.status(500).json({ success: false });
+        }
+        res.json(results);
+    });
+});
+
+// ================= DELETE HOTEL =================
+app.delete("/api/hotels/:id", (req, res) => {
+    const { id } = req.params;
+
+    db.query(
+        "DELETE FROM hotels WHERE id = ?", [id],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ success: false });
+            }
+            res.json({ success: true });
+        }
+    );
+});
+
+// ================= UPDATE HOTEL =================
+app.put("/api/hotels/:id", (req, res) => {
+    const { id } = req.params;
+    const { name, rating } = req.body;
+
+    db.query(
+        "UPDATE hotels SET name = ?, rating = ? WHERE id = ?", [name, rating, id],
+        (err) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ success: false });
+            }
+            res.json({ success: true });
+        }
+    );
+});
