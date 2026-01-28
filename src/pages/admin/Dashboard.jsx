@@ -203,8 +203,20 @@ const Dashboard = () => {
                 </td>
 
                 <td className="actions">
-                  <span onClick={() => handleEdit(h)}>✏</span>
-                  <span onClick={() => handleDelete(h.id)}>🗑</span>
+                 <button
+                      className="icon-btn"
+                      title="Sửa"
+                      onClick={() => handleEdit(h)}
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="icon-btn"
+                      title="Xóa"
+                      onClick={() => handleDelete(h.id)}
+                    >
+                      🗑
+                    </button>
                 </td>
               </tr>
             ))}

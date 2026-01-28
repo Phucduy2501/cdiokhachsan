@@ -148,8 +148,20 @@ const Users = () => {
                 <td>{formatDateVN(u.created_at)}</td>
 
                 <td className="actions">
-                  <span onClick={() => handleEdit(u)}>✏</span>
-                  <span onClick={() => handleDelete(u.id)}>🗑</span>
+                  <button
+                      className="icon-btn"
+                      title="Sửa"
+                      onClick={() => handleEdit(h)}
+                    >
+                      ✎
+                    </button>
+                    <button
+                      className="icon-btn"
+                      title="Xóa"
+                      onClick={() => handleDelete(h.id)}
+                    >
+                      🗑
+                    </button>
                 </td>
               </tr>
             ))}
