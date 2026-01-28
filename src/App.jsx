@@ -8,6 +8,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Hotels from "./pages/admin/Hotels";
 import Bookings from "./pages/admin/Bookings";
+import Users from "./pages/admin/Users";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route index element={<Dashboard />} />
         <Route path="hotels" element={<Hotels />} />
         <Route path="bookings" element={<Bookings />} />
+        <Route path="/admin/users" element={<Users />} />
       </Route>
     </Routes>
   );
