@@ -54,7 +54,7 @@ const Dashboard = () => {
       if (res.data.success) {
         setOpenAddOwner(false);
         setOwnerForm({ name: "", email: "", phone: "", password: "" });
-        loadHotels(); // reload bảng
+        loadHotels();
       }
     } catch (err) {
       console.log(err);

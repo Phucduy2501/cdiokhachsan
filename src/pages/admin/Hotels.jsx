@@ -20,14 +20,11 @@ const Hotels = () => {
     return `${d.getDate()} Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`;
   };
 
-  // demo: mapping role hiển thị giống mẫu
   const getRoleText = (h) => {
-    // nếu bạn có cột role thật thì đổi theo db
     return "Chủ sở hữu";
   };
 
   const getBadgeType = (h) => {
-    // demo theo rating cho có 3 loại giống UI mẫu
     if (h.rating >= 5) return "admin";
     if (h.rating >= 4) return "owner";
     return "pending";
