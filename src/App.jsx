@@ -9,6 +9,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Hotels from "./pages/admin/Hotels";
 import Bookings from "./pages/admin/Bookings";
 import Users from "./pages/admin/Users";
+import Home from "./pages/user/Home";
 
 function App() {
   return (
@@ -26,6 +27,9 @@ function App() {
         <Route path="bookings" element={<Bookings />} />
         <Route path="/admin/users" element={<Users />} />
       </Route>
+
+      {/* USER */}
+      <Route path="/home" element={<Home />} />
     </Routes>
   );
 }

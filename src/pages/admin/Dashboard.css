@@ -5,9 +5,6 @@
     font-family: "Segoe UI", sans-serif;
 }
 
-
-/* HEADER */
-
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -85,9 +82,6 @@
     margin-bottom: 22px;
 }
 
-
-/* LEFT SEARCH */
-
 .toolbar-left {
     flex: 1;
 }
@@ -119,9 +113,6 @@
     min-width: 270px;
 }
 
-
-/* BUTTON */
-
 .btn-primary {
     display: inline-flex;
     align-items: center;
@@ -148,9 +139,6 @@
     font-weight: 900;
     line-height: 1;
 }
-
-
-/* OPTIONS ROW */
 
 .toolbar-options {
     display: flex;
@@ -184,9 +172,6 @@
     background: #f1f5f9;
     cursor: pointer;
 }
-
-
-/* STARS */
 
 .toolbar-stars {
     display: flex;
