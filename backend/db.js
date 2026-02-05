@@ -1,17 +1,21 @@
 import mysql from "mysql2";
 
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "", // nếu có thì điền
-    database: "bookstay",
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+    port: process.env.MYSQL_PORT,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 db.connect((err) => {
     if (err) {
-        console.log("❌ Lỗi DB:", err);
+        console.error("❌ Lỗi DB:", err);
     } else {
-        console.log("✅ MySQL connected");
+        console.log("✅ MySQL Railway connected");
     }
 });
 
