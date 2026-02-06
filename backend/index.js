@@ -9,25 +9,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-/* =========================
-   MYSQL CONNECTION (RAILWAY)
-========================= */
 const db = mysql.createConnection({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE,
     port: process.env.MYSQL_PORT,
-    ssl: {
-        rejectUnauthorized: false,
-    },
 });
 
 db.connect((err) => {
     if (err) {
-        console.error("❌ MySQL error:", err);
+        console.error("❌ MySQL error:", err.message);
     } else {
-        console.log("✅ MySQL connected (Railway)");
+        console.log("✅ MySQL connected to", process.env.MYSQLDATABASE);
     }
 });
 
@@ -59,29 +53,34 @@ app.get("/", (req, res) => {
 });
 
 /* =========================
-   AUTH
+   LOGIN
 ========================= */
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
 
-    db.query(
-        "SELECT * FROM users WHERE email = ? AND password = ?", [email, password],
-        (err, result) => {
-            if (err) return res.status(500).json({ success: false });
+    if (!email || !password) {
+        return res.json({ success: false, message: "Thiếu thông tin" });
+    }
 
-            if (result.length > 0) {
-                res.json({
-                    success: true,
-                    user: {
-                        id: result[0].id,
-                        name: result[0].name,
-                        email: result[0].email,
-                        role: result[0].role,
-                    },
-                });
-            } else {
-                res.json({ success: false, message: "Sai email hoặc mật khẩu" });
+    db.query(
+        "SELECT id, name, email, role FROM users WHERE email = ? AND password = ?", [email, password],
+        (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ success: false });
             }
+
+            if (results.length === 0) {
+                return res.json({
+                    success: false,
+                    message: "Sai email hoặc mật khẩu",
+                });
+            }
+
+            res.json({
+                success: true,
+                user: results[0],
+            });
         }
     );
 });
@@ -96,16 +95,22 @@ app.post("/register", (req, res) => {
         return res.json({ success: false, message: "Thiếu thông tin" });
     }
 
-    db.query("SELECT * FROM users WHERE email = ?", [email], (err, result) => {
-        if (result.length > 0) {
-            return res.json({ success: false, message: "Email đã tồn tại" });
-        }
+    db.query(
+        "SELECT id FROM users WHERE email = ?", [email],
+        (err, result) => {
+            if (result.length > 0) {
+                return res.json({
+                    success: false,
+                    message: "Email đã tồn tại",
+                });
+            }
 
-        db.query(
-            "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, 'user')", [name, email, password, phone],
-            () => res.json({ success: true })
-        );
-    });
+            db.query(
+                "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, 'user')", [name, email, password, phone],
+                () => res.json({ success: true })
+            );
+        }
+    );
 });
 
 /* =========================
@@ -114,26 +119,32 @@ app.post("/register", (req, res) => {
 app.post("/send-otp", (req, res) => {
     const { email } = req.body;
 
-    db.query("SELECT * FROM users WHERE email = ?", [email], (err, result) => {
-        if (result.length === 0) {
-            return res.json({ success: false, message: "Email không tồn tại" });
-        }
-
-        const otp = Math.floor(100000 + Math.random() * 900000);
-        otpStore[email] = otp;
-
-        transporter.sendMail({
-                from: process.env.MAIL_USER,
-                to: email,
-                subject: "Mã OTP đặt lại mật khẩu",
-                text: `Mã OTP của bạn là: ${otp}`,
-            },
-            (error) => {
-                if (error) return res.json({ success: false });
-                res.json({ success: true });
+    db.query(
+        "SELECT id FROM users WHERE email = ?", [email],
+        (err, result) => {
+            if (result.length === 0) {
+                return res.json({
+                    success: false,
+                    message: "Email không tồn tại",
+                });
             }
-        );
-    });
+
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            otpStore[email] = otp;
+
+            transporter.sendMail({
+                    from: process.env.MAIL_USER,
+                    to: email,
+                    subject: "Mã OTP đặt lại mật khẩu",
+                    text: `Mã OTP của bạn là: ${otp}`,
+                },
+                (error) => {
+                    if (error) return res.json({ success: false });
+                    res.json({ success: true });
+                }
+            );
+        }
+    );
 });
 
 app.post("/verify-otp", (req, res) => {
@@ -157,10 +168,10 @@ app.post("/verify-otp", (req, res) => {
 ========================= */
 app.get("/api/hotels", (req, res) => {
     const sql = `
-        SELECT hotels.id, hotels.name, hotels.rating, hotels.created_at,
-               users.name AS owner_name, users.email AS owner_email
-        FROM hotels
-        JOIN users ON hotels.owner_id = users.id
+        SELECT h.id, h.name, h.rating, h.created_at,
+               u.name AS owner_name, u.email AS owner_email
+        FROM hotels h
+        JOIN users u ON h.owner_id = u.id
     `;
 
     db.query(sql, (err, results) => {
@@ -171,6 +182,7 @@ app.get("/api/hotels", (req, res) => {
 
 app.put("/api/hotels/:id", (req, res) => {
     const { name, rating } = req.body;
+
     db.query(
         "UPDATE hotels SET name = ?, rating = ? WHERE id = ?", [name, rating, req.params.id],
         () => res.json({ success: true })
@@ -197,33 +209,8 @@ app.get("/api/users", (req, res) => {
     );
 });
 
-app.post("/api/users", (req, res) => {
-    const { name, email, password, phone, role } = req.body;
-
-    db.query(
-        "INSERT INTO users (name, email, password, phone, role) VALUES (?, ?, ?, ?, ?)", [name, email, password, phone, role || "user"],
-        () => res.json({ success: true })
-    );
-});
-
-app.put("/api/users/:id", (req, res) => {
-    const { name, role } = req.body;
-
-    db.query(
-        "UPDATE users SET name = ?, role = ? WHERE id = ?", [name, role, req.params.id],
-        () => res.json({ success: true })
-    );
-});
-
-app.delete("/api/users/:id", (req, res) => {
-    db.query(
-        "DELETE FROM users WHERE id = ?", [req.params.id],
-        () => res.json({ success: true })
-    );
-});
-
 /* =========================
-   START SERVER (RAILWAY)
+   START SERVER
 ========================= */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
