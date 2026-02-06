@@ -57,35 +57,30 @@ app.get("/", (req, res) => {
 /* =========================
    LOGIN
 ========================= */
-app.post("/login", (req, res) => {
+app.post("/api/login", (req, res) => {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.json({ success: false, message: "Thiếu thông tin" });
-    }
 
     db.query(
         "SELECT id, name, email, role FROM users WHERE email = ? AND password = ?", [email, password],
-        (err, results) => {
+        (err, result) => {
             if (err) {
-                console.error(err);
+                console.error("LOGIN ERROR:", err);
                 return res.status(500).json({ success: false });
             }
 
-            if (results.length === 0) {
-                return res.json({
-                    success: false,
-                    message: "Sai email hoặc mật khẩu",
-                });
+            if (result.length === 0) {
+                return res.json({ success: false, message: "Sai email hoặc mật khẩu" });
             }
 
             res.json({
                 success: true,
-                user: results[0],
+                message: "Đăng nhập thành công",
+                user: result[0],
             });
         }
     );
 });
+
 
 /* =========================
    REGISTER

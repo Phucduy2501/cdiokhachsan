@@ -14,7 +14,7 @@ function Login() {
     }
 
     try {
-      const res = await fetch("https://cdiokhachsan-production.up.railway.app/login", {
+      const res = await fetch("https://cdiokhachsan-production.up.railway.app/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
