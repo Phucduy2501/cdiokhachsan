@@ -1,0 +1,62 @@
+.roomsPage {
+    padding: 40px 0 60px;
+}
+
+.roomsTitle {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.roomsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.roomCard {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(2, 6, 23, 0.06);
+}
+
+.roomCard img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.roomBody {
+    padding: 14px;
+}
+
+.roomBody h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.roomBody p {
+    margin: 6px 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.roomBottom {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.roomPrice {
+    font-weight: 800;
+    color: #2f57ff;
+}
+
+@media (max-width: 980px) {
+    .roomsGrid {
+        grid-template-columns: 1fr;
+    }
+}

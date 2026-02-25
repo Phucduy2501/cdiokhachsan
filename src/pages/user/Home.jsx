@@ -1,5 +1,11 @@
 import "./Home.css";
 
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+import SearchBox from "./SearchBox";
+import HotelCard from "./HotelCard";
+import MiniHotelCard from "./MiniHotelCard";
+
 export default function Home() {
   const topChoices = [
     {
@@ -39,6 +45,7 @@ export default function Home() {
       img: "https://images.unsplash.com/photo-1505692952047-1a78307da8f2?q=80&w=1200&auto=format&fit=crop",
     },
   ];
+
 
   const popular = [
     {
@@ -91,6 +98,7 @@ export default function Home() {
     },
   ];
 
+
   const handleSearch = (e) => {
     e.preventDefault();
     alert("Tìm kiếm thành công (demo)!");
@@ -98,167 +106,35 @@ export default function Home() {
 
   return (
     <div className="homePage">
-      {/* Navbar */}
-      <header className="homeNavbar">
-        <div className="homeContainer navWrap">
-          <div className="brand">BookStay</div>
-
-          <nav className="navLinks">
-            <a className="active" href="#">
-              Trang chủ
-            </a>
-            <a href="#">Khách sạn</a>
-            <a href="#">Phòng</a>
-            <a href="#">Giới thiệu</a>
-          </nav>
-
-          <div className="navActions">
-            <button className="btn btnGhost">Login</button>
-            <button className="btn btnPrimary">Sign up</button>
-          </div>
-        </div>
-      </header>
 
       <main className="homeContainer">
-        {/* Hero */}
-        <section className="hero">
-          <div className="heroLeft">
-            <h1>
-              Nơi Nghỉ Dưỡng Cao Cấp <br />
-              Cho Kỳ Nghỉ Sắp Tới
-            </h1>
-            <p>
-              Một trải nghiệm nghỉ dưỡng tuyệt vời dành cho bạn và gia đình trong
-              mơ. Cùng khám phá những khách sạn đẳng cấp.
-            </p>
 
-            <div className="heroStats">
-              <div className="stat">
-                <div className="statIcon">🏨</div>
-                <div>
-                  <div className="statNumber">2500</div>
-                  <div className="statText">người dùng</div>
-                </div>
-              </div>
+        <SearchBox onSearch={handleSearch} />
 
-              <div className="stat">
-                <div className="statIcon">⭐</div>
-                <div>
-                  <div className="statNumber">200</div>
-                  <div className="statText">đánh giá</div>
-                </div>
-              </div>
-
-              <div className="stat">
-                <div className="statIcon">🌍</div>
-                <div>
-                  <div className="statNumber">30</div>
-                  <div className="statText">khu nghỉ dưỡng</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="heroRight">
-            <div className="heroImage">
-              <img
-                src="https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=1200&auto=format&fit=crop"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Search */}
-        <section className="search">
-          <form className="searchBox" onSubmit={handleSearch}>
-            <div className="field">
-              <span className="icon">📅</span>
-              <input placeholder="Kiểm tra phòng trống" />
-            </div>
-
-            <div className="field">
-              <span className="icon">👤</span>
-              <select defaultValue="2">
-                <option value="1">1 người</option>
-                <option value="2">2 người</option>
-                <option value="3">3 người</option>
-                <option value="4">4 người</option>
-              </select>
-            </div>
-
-            <div className="field">
-              <span className="icon">📍</span>
-              <input placeholder="Địa điểm" />
-            </div>
-
-            <button className="btn btnPrimary searchBtn" type="submit">
-              Tìm kiếm
-            </button>
-          </form>
-        </section>
-
-        {/* Top choices */}
         <section className="section">
           <div className="sectionHead">
             <h2>Lựa chọn hàng đầu</h2>
           </div>
-
           <div className="gridTop">
-            {topChoices.map((item) => (
-              <article
-                key={item.id}
-                className={`card ${item.wide ? "cardWide" : ""}`}
-              >
-                <div className="cardImg">
-                  <span className="priceTag">{item.price}</span>
-                  <img src={item.img} alt={item.name} />
-                </div>
-                <div className="cardBody">
-                  <h3>{item.name}</h3>
-                  <p>{item.location}</p>
-                </div>
-              </article>
+            {topChoices.map(hotel => (
+              <HotelCard key={hotel.id} hotel={hotel} />
             ))}
           </div>
         </section>
 
-        {/* Popular */}
         <section className="section">
           <div className="sectionHead rowBetween">
             <h2>Lựa chọn phổ biến</h2>
-            <a className="pill" href="#">
-              Lựa chọn phổ biến
-            </a>
+            <span className="pill">Xem thêm</span>
           </div>
-
           <div className="gridPopular">
-            {popular.map((item) => (
-              <div className="miniCard" key={item.id}>
-                <img src={item.img} alt={item.name} />
-                <div className="miniBody">
-                  <h4>{item.name}</h4>
-                  <p>{item.location}</p>
-                </div>
-              </div>
+            {popular.map(hotel => (
+              <MiniHotelCard key={hotel.id} hotel={hotel} />
             ))}
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="footer">
-        <div className="homeContainer footerWrap">
-          <div>
-            <div className="brandFooter">BookStay.</div>
-            <p className="muted">Chúng tôi giúp kỳ nghỉ của bạn trở nên trọn vẹn.</p>
-          </div>
-
-          <div className="footerCta">
-            <div className="muted">Trở thành đối tác lưu trú</div>
-            <button className="btn btnPrimary">Đăng ký ngay</button>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

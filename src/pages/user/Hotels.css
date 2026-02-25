@@ -1,0 +1,33 @@
+.hotelsPage {
+    padding-bottom: 60px;
+}
+
+.hotelsHead {
+    margin: 20px 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hotelsHead h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.hotelsHead span {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.hotelsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+@media (max-width: 980px) {
+    .hotelsGrid {
+        grid-template-columns: 1fr;
+    }
+}

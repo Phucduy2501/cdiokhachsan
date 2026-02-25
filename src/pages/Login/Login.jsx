@@ -2,33 +2,39 @@ import { useState } from "react";
 import "./Login.css";
 import { Link } from "react-router-dom";
 import image from "../../assets/2.jpg";
+import api from "../../services/api";
 
 function Login() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(""); 
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      alert("Vui lòng nhập đầy đủ email và mật khẩu");
+    if (!email) {
+      alert("Vui lòng nhập email");
       return;
     }
 
     try {
-      const res = await fetch("https://cdiokhachsan-production.up.railway.app/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await api.get("/users");
+      const users = res.data.data;
 
-      const data = await res.json();
-      alert(data.message);
+      const foundUser = users.find(
+        (u) => u.email === email
+      );
 
-      if (data.success) {
-        console.log("User:", data.user);
+      if (!foundUser) {
+        alert("Tài khoản không tồn tại");
+        return;
       }
-    } catch (error) {
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(foundUser)
+      );
+
+      window.location.href = "/";
+    } catch (err) {
+      console.error(err);
       alert("Không kết nối được server");
     }
   };

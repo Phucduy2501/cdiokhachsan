@@ -52,9 +52,6 @@ a {
     opacity: 0.92;
 }
 
-
-/* NAVBAR */
-
 .homeNavbar {
     background: #fff;
     border-bottom: 1px solid var(--border);
@@ -97,10 +94,10 @@ a {
 .navActions {
     display: flex;
     gap: 10px;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
 }
-
-
-/* HERO */
 
 .hero {
     margin-top: 26px;
@@ -176,9 +173,6 @@ a {
     object-fit: cover;
     border-radius: 18px;
 }
-
-
-/* SEARCH */
 
 .search {
     margin-top: 22px;
