@@ -40,7 +40,7 @@ export default function Navbar() {
           ) : (
             <>
               <span style={{ fontWeight: 600 }}>
-                Xin chào, {user.name}
+                Xin chào, {user.name || user.email}
               </span>
               <button className="btn btnGhost" onClick={handleLogout}>
                 Logout

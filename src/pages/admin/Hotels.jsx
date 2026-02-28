@@ -47,7 +47,6 @@ const Hotels = () => {
 
   return (
     <div className="hotels-page">
-      {/* HEADER */}
       <div className="dashboard-header">
         <div>
           <h3>Xin Chào, Phúc Duy</h3>
@@ -73,7 +72,6 @@ const Hotels = () => {
         </div>
       </div>
 
-      {/* TOOLBAR */}
       <div className="hotels-toolbar">
         <input className="hotels-search" placeholder="🔍 Tìm kiếm" />
 
@@ -102,7 +100,6 @@ const Hotels = () => {
         </div>
       </div>
 
-      {/* TABLE */}
       <div className="table-card">
         <h4>Danh Sách Chủ Khách Sạn</h4>
 
@@ -128,7 +125,6 @@ const Hotels = () => {
                     <p>{h.owner_email}</p>
                   </td>
 
-                  {/* Badge giống mẫu */}
                   <td>
                     <span className={`badge ${type}`}>
                       {type === "admin"
@@ -165,7 +161,6 @@ const Hotels = () => {
           </tbody>
         </table>
 
-        {/* PAGINATION UI */}
         <div className="pagination">
           <span>Số mục trên mỗi trang:</span>
           <select>

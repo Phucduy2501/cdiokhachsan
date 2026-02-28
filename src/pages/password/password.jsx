@@ -6,15 +6,12 @@ import "../Login/Login.css";
 function Password() {
   const navigate = useNavigate();
 
-  // STEP CONTROL
   const [step, setStep] = useState(1);
 
-  // DATA
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  // ================= STEP 1: SEND OTP =================
   const handleSendOtp = async () => {
     if (!email) {
       alert("Vui lòng nhập email");
@@ -34,7 +31,7 @@ function Password() {
       alert(data.message);
 
       if (data.success) {
-        setStep(2); // sang bước nhập OTP
+        setStep(2);
       }
     } catch (error) {
       alert("Không kết nối được server");

@@ -47,16 +47,10 @@ transporter.verify((err) => {
 
 let otpStore = {};
 
-/* =========================
-   TEST ROOT
-========================= */
 app.get("/", (req, res) => {
     res.send("Backend running...");
 });
 
-/* =========================
-   LOGIN
-========================= */
 app.post("/api/login", (req, res) => {
     const { email, password } = req.body;
 
@@ -193,9 +187,7 @@ app.delete("/api/hotels/:id", (req, res) => {
     );
 });
 
-/* =========================
-   USERS (ADMIN)
-========================= */
+
 app.get("/api/users", (req, res) => {
     db.query(
         "SELECT id, name, email, role, created_at FROM users",
@@ -206,9 +198,7 @@ app.get("/api/users", (req, res) => {
     );
 });
 
-/* =========================
-   START SERVER
-========================= */
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);

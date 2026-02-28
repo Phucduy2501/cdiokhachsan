@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import image from "../../assets/2.jpg";
 import "../Login/Login.css";
+import { supabase } from "../../services/supabase";
 
 function Register() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ function Register() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     if (!name || !email || !phone || !password || !confirmPassword) {
@@ -23,29 +25,28 @@ function Register() {
       return;
     }
 
-    try {
-      const res = await fetch("http://localhost:3000/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
           name,
-          email,
           phone,
-          password,
-        }),
-      });
+        },
+      },
+    });
 
-      const data = await res.json();
-      alert(data.message);
+    setLoading(false);
 
-      if (data.success) {
-        navigate("/login");
-      }
-    } catch (error) {
-      alert("Không kết nối được server");
+    if (error) {
+      alert(error.message);
+      return;
     }
+
+    alert("Đăng ký thành công! Vui lòng đăng nhập");
+    navigate("/login");
   };
 
   return (
@@ -107,8 +108,12 @@ function Register() {
           />
         </div>
 
-        <button className="login-btn" onClick={handleRegister}>
-          Đăng Ký
+        <button
+          className="login-btn"
+          onClick={handleRegister}
+          disabled={loading}
+        >
+          {loading ? "Đang đăng ký..." : "Đăng Ký"}
         </button>
 
         <div className="login-links">

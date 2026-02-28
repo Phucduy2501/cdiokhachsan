@@ -1,41 +1,79 @@
 import { useState } from "react";
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import image from "../../assets/2.jpg";
-import api from "../../services/api";
+import { supabase } from "../../services/supabase";
 
 function Login() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); 
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
-    if (!email) {
-      alert("Vui lòng nhập email");
+    if (!email || !password) {
+      alert("Vui lòng nhập email và mật khẩu");
       return;
     }
 
-    try {
-      const res = await api.get("/users");
-      const users = res.data.data;
+    setLoading(true);
 
-      const foundUser = users.find(
-        (u) => u.email === email
-      );
+    // 1. Login Supabase Auth
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (!foundUser) {
-        alert("Tài khoản không tồn tại");
+    if (error) {
+      setLoading(false);
+      alert("Email hoặc mật khẩu không đúng");
+      return;
+    }
+
+    const authUser = data.user;
+
+    // 2. Lấy user trong bảng public.users
+    let { data: userRow } = await supabase
+      .from("users")
+      .select("id, email, name, role")
+      .eq("id", authUser.id)
+      .maybeSingle();
+
+    // 3. Nếu chưa có → tạo mới
+    if (!userRow) {
+      const { data: newUser, error: insertError } = await supabase
+        .from("users")
+        .insert([
+          {
+            id: authUser.id,
+            email: authUser.email,
+            name: authUser.email.split("@")[0], // 👈 TẠM LẤY TÊN
+            role: "guest",
+          },
+        ])
+        .select()
+        .single();
+
+      if (insertError) {
+        setLoading(false);
+        alert("Không tạo được user");
         return;
       }
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(foundUser)
-      );
+      userRow = newUser;
+    }
 
-      window.location.href = "/";
-    } catch (err) {
-      console.error(err);
-      alert("Không kết nối được server");
+    setLoading(false);
+
+    // 4. Lưu localStorage
+    localStorage.setItem("user", JSON.stringify(userRow));
+
+    // 5. Điều hướng
+    if (userRow.role === "admin") {
+      navigate("/admin", { replace: true });
+    } else {
+      navigate("/home", { replace: true });
     }
   };
 
@@ -52,7 +90,6 @@ function Login() {
           <label>Email</label>
           <input
             type="email"
-            placeholder="Nhập email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -62,14 +99,13 @@ function Login() {
           <label>Mật khẩu</label>
           <input
             type="password"
-            placeholder="Vui lòng nhập mật khẩu"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
-        <button className="login-btn" onClick={handleLogin}>
-          Đăng Nhập
+        <button className="login-btn" onClick={handleLogin} disabled={loading}>
+          {loading ? "Đang đăng nhập..." : "Đăng Nhập"}
         </button>
 
         <div className="login-links">

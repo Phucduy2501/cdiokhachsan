@@ -17,19 +17,23 @@ import UserHotels from "./pages/user/Hotels";
 import Rooms from "./pages/user/Rooms";
 import About from "./pages/user/About";
 
-function App() {
-  const user = JSON.parse(localStorage.getItem("user"));
+import ProtectedRoute from "./components/ProtectedRoute";
 
+function App() {
   return (
     <Routes>
+      {/* Auth */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/password" element={<Password />} />
 
+      {/* ADMIN */}
       <Route
         path="/admin"
         element={
-          user?.role === "admin" ? <AdminLayout /> : <Navigate to="/login" />
+          <ProtectedRoute role="admin">
+            <AdminLayout />
+          </ProtectedRoute>
         }
       >
         <Route index element={<Dashboard />} />
@@ -38,22 +42,24 @@ function App() {
         <Route path="users" element={<Users />} />
       </Route>
 
-      <Route element={<MainLayout />}>
+      {/* USER */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/home" element={<Home />} />
         <Route path="/hotels" element={<UserHotels />} />
         <Route path="/rooms" element={<Rooms />} />
         <Route path="/about" element={<About />} />
       </Route>
 
+      {/* ROOT */}
       <Route
         path="/"
-        element={
-          user
-            ? user.role === "admin"
-              ? <Navigate to="/admin" />
-              : <Navigate to="/home" />
-            : <Navigate to="/login" />
-        }
+        element={<Navigate to="/home" replace />}
       />
     </Routes>
   );
