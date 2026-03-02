@@ -2,7 +2,6 @@
     background: #fff;
     border-radius: 16px;
     overflow: hidden;
-    /* QUAN TRỌNG */
     cursor: pointer;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     transition: transform 0.25s ease;
@@ -12,15 +11,10 @@
     transform: translateY(-6px);
 }
 
-
-/* ===== FIX ẢNH Ở ĐÂY ===== */
-
 .hotelCard img {
     width: 100%;
     height: 200px;
-    /* BẮT BUỘC */
     object-fit: cover;
-    /* BẮT BUỘC */
     display: block;
 }
 

@@ -42,7 +42,6 @@ export default function HotelDetail() {
 
   return (
     <div className="hotelDetailPage">
-      {/* ===== HERO ===== */}
       <div className="hotelHero">
         <img src={hotel.image_url} alt={hotel.name} />
 
@@ -69,7 +68,6 @@ export default function HotelDetail() {
         </div>
       </div>
 
-      {/* ===== DESCRIPTION ===== */}
       <div className="hotelDescription">
         <h2>Giới thiệu</h2>
         <p>
@@ -86,7 +84,6 @@ export default function HotelDetail() {
         </div>
       </div>
 
-      {/* ===== ROOMS ===== */}
       <h2 className="sectionTitle">Danh sách phòng</h2>
 
       {rooms.length === 0 && (
@@ -116,7 +113,6 @@ export default function HotelDetail() {
         ))}
       </div>
 
-      {/* ===== BOOKING MODAL ===== */}
       {selectedRoom && (
         <BookingModal
           room={selectedRoom}

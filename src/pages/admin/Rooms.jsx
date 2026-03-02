@@ -160,7 +160,6 @@ const Hotels = () => {
           </tbody>
         </table>
 
-        {/* PAGINATION UI */}
         <div className="pagination">
           <span>Số mục trên mỗi trang:</span>
           <select>

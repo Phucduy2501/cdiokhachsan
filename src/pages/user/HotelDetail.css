@@ -154,9 +154,6 @@
     color: #64748b;
 }
 
-
-/* ===== RESPONSIVE ===== */
-
 @media (max-width: 900px) {
     .hotelHero {
         flex-direction: column;

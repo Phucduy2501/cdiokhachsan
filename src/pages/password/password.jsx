@@ -38,7 +38,6 @@ function Password() {
     }
   };
 
-  // ================= STEP 2: VERIFY OTP =================
   const handleVerifyOtp = async () => {
     if (!otp || !newPassword) {
       alert("Vui lòng nhập đầy đủ OTP và mật khẩu mới");
@@ -78,7 +77,6 @@ function Password() {
       <div className="login-form">
         <h2>Quên mật khẩu</h2>
 
-        {/* ========== STEP 1 UI ========== */}
         {step === 1 && (
           <>
             <div className="form-group">
@@ -97,7 +95,6 @@ function Password() {
           </>
         )}
 
-        {/* ========== STEP 2 UI ========== */}
         {step === 2 && (
           <>
             <div className="form-group">

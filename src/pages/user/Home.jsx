@@ -81,7 +81,6 @@ export default function Home() {
       <main className="homeContainer">
         <SearchBox />
 
-        {/* ===== LỰA CHỌN HÀNG ĐẦU ===== */}
         <section className="section">
           <div className="sectionHead">
             <h2>Lựa chọn hàng đầu</h2>
@@ -94,7 +93,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ===== LỰA CHỌN PHỔ BIẾN (8 CÁI) ===== */}
         <section className="section">
           <div className="sectionHead rowBetween">
             <h2>Lựa chọn phổ biến</h2>
