@@ -1,9 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "../../services/api";
 import "./Dashboard.css";
 
 const Dashboard = () => {
   const [hotels, setHotels] = useState([]);
+  const [openAddOwner, setOpenAddOwner] = useState(false);
+  const [openUserMenu, setOpenUserMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {
+    name: "Phúc Duy",
+    role: "Admin",
+  };
+
+  const [ownerForm, setOwnerForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
 
   const loadHotels = () => {
     api.get("/api/hotels").then((res) => setHotels(res.data));
@@ -12,6 +27,21 @@ const Dashboard = () => {
   useEffect(() => {
     loadHotels();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
 
   const formatDateVN = (dateStr) => {
     const d = new Date(dateStr);
@@ -30,153 +60,126 @@ const Dashboard = () => {
 
     api.put(`/api/hotels/${hotel.id}`, { name, rating }).then(loadHotels);
   };
-  const [openAddOwner, setOpenAddOwner] = useState(false);
 
-  const [ownerForm, setOwnerForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-  });
   const handleAddOwner = async () => {
-    try {
-      const { name, email, phone, password } = ownerForm;
-
-      if (!name || !email || !phone || !password) {
-        alert("Vui lòng nhập đầy đủ thông tin chủ sở hữu!");
-        return;
-      }
-
-      const res = await api.post("/register", ownerForm);
-
-      alert(res.data.message);
-
-      if (res.data.success) {
-        setOpenAddOwner(false);
-        setOwnerForm({ name: "", email: "", phone: "", password: "" });
-        loadHotels();
-      }
-    } catch (err) {
-      console.log(err);
-      alert("Lỗi thêm chủ sở hữu!");
+    const { name, email, phone, password } = ownerForm;
+    if (!name || !email || !phone || !password) {
+      alert("Vui lòng nhập đầy đủ thông tin");
+      return;
     }
-  };
 
+    await api.post("/register", ownerForm);
+    setOpenAddOwner(false);
+    setOwnerForm({ name: "", email: "", phone: "", password: "" });
+    loadHotels();
+  };
 
   return (
     <div className="dashboard">
-      {/* HEADER */}
       <div className="dashboard-header">
         <div>
-          <h3>Xin Chào, Phúc Duy</h3>
+          <h3>Xin chào, {currentUser.name}</h3>
           <p>Chúc 1 ngày tốt lành</p>
         </div>
 
-        <div className="user-info">
+        <div className="user-info" ref={menuRef}>
           <span className="bell">🔔</span>
-
           <span className="divider"></span>
 
-          <img className="avatar" src="/public/71dbf3f6-ac1b-4262-9312-3016b8c754fc.jpg" alt="avatar" />
+          <img
+            className="avatar"
+            src="/public/71dbf3f6-ac1b-4262-9312-3016b8c754fc.jpg"
+            alt="avatar"
+            onClick={() => setOpenUserMenu(!openUserMenu)}
+          />
 
-          <div className="user-text">
-            <strong>Phúc Duy</strong>
-            <p>Admin</p>
+          <div
+            className="user-text"
+            onClick={() => setOpenUserMenu(!openUserMenu)}
+          >
+            <strong>{currentUser.name}</strong>
+            <p>{currentUser.role}</p>
           </div>
 
-          <span className="caret">▾</span>
+          <span
+            className="caret"
+            onClick={() => setOpenUserMenu(!openUserMenu)}
+          >
+            ▾
+          </span>
+
+          {openUserMenu && (
+            <div className="user-dropdown">
+              <button className="dropdown-item" onClick={handleLogout}>
+                🚪 Đăng xuất
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* TOOLBAR */}
       <div className="dashboard-toolbar">
-        <div className="toolbar-left">
-          <input placeholder="🔍 Tìm kiếm" />
-        </div>
+        <input placeholder="🔍 Tìm kiếm" />
 
-        <div className="toolbar-right">
-          <button className="btn-primary" onClick={() => setOpenAddOwner(true)}>
-            Thêm chủ sở hữu <span className="plus">+</span>
-          </button>
-
-
-          <div className="toolbar-options">
-            <div className="dropdown">
-              Sắp xếp theo <span className="arrow">▼</span>
-            </div>
-
-            <div className="dropdown">
-              Tìm kiếm đã lưu <span className="arrow">▼</span>
-            </div>
-
-            <div className="filter-icon">⚙️</div>
-          </div>
-
-          <div className="toolbar-stars">
-            {"★★★★★".split("").map((s, i) => (
-              <span key={i} className="star">{s}</span>
-            ))}
-          </div>
-        </div>
+        <button className="btn-primary" onClick={() => setOpenAddOwner(true)}>
+          Thêm chủ sở hữu +
+        </button>
       </div>
+
       {openAddOwner && (
         <div className="modal-overlay" onClick={() => setOpenAddOwner(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h3>Thêm chủ sở hữu</h3>
 
-            <div className="modal-form">
-              <input
-                placeholder="Họ tên"
-                value={ownerForm.name}
-                onChange={(e) => setOwnerForm({ ...ownerForm, name: e.target.value })}
-              />
-              <input
-                placeholder="Email"
-                value={ownerForm.email}
-                onChange={(e) => setOwnerForm({ ...ownerForm, email: e.target.value })}
-              />
-              <input
-                placeholder="Số điện thoại"
-                value={ownerForm.phone}
-                onChange={(e) => setOwnerForm({ ...ownerForm, phone: e.target.value })}
-              />
-              <input
-                type="password"
-                placeholder="Mật khẩu"
-                value={ownerForm.password}
-                onChange={(e) =>
-                  setOwnerForm({ ...ownerForm, password: e.target.value })
-                }
-              />
-            </div>
+            <input
+              placeholder="Họ tên"
+              value={ownerForm.name}
+              onChange={(e) =>
+                setOwnerForm({ ...ownerForm, name: e.target.value })
+              }
+            />
+            <input
+              placeholder="Email"
+              value={ownerForm.email}
+              onChange={(e) =>
+                setOwnerForm({ ...ownerForm, email: e.target.value })
+              }
+            />
+            <input
+              placeholder="Số điện thoại"
+              value={ownerForm.phone}
+              onChange={(e) =>
+                setOwnerForm({ ...ownerForm, phone: e.target.value })
+              }
+            />
+            <input
+              type="password"
+              placeholder="Mật khẩu"
+              value={ownerForm.password}
+              onChange={(e) =>
+                setOwnerForm({ ...ownerForm, password: e.target.value })
+              }
+            />
 
             <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setOpenAddOwner(false)}>
-                Hủy
-              </button>
-              <button className="btn-save" onClick={handleAddOwner}>
-                Lưu
-              </button>
+              <button onClick={() => setOpenAddOwner(false)}>Hủy</button>
+              <button onClick={handleAddOwner}>Lưu</button>
             </div>
           </div>
         </div>
       )}
 
-
-
-
-      {/* TABLE */}
       <div className="table-card">
-        <h4>Danh Sách Khách Sạn</h4>
+        <h4>Danh sách khách sạn</h4>
 
         <table>
           <thead>
             <tr>
-              <th>Chủ khách sạn</th>
-              <th>Tên khách sạn</th>
+              <th>Chủ KS</th>
+              <th>Tên KS</th>
               <th>Ngày đăng ký</th>
               <th>Đánh giá</th>
-              <th>Hoạt động</th>
+              <th>Hành động</th>
             </tr>
           </thead>
 
@@ -187,52 +190,17 @@ const Dashboard = () => {
                   <strong>{h.owner_name}</strong>
                   <p>{h.owner_email}</p>
                 </td>
-
                 <td>{h.hotel_name}</td>
                 <td>{formatDateVN(h.created_at)}</td>
-
-                <td className="rating">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span
-                      key={i}
-                      className={i < h.rating ? "star active" : "star"}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </td>
-
-                <td className="actions">
-                 <button
-                      className="icon-btn"
-                      title="Sửa"
-                      onClick={() => handleEdit(h)}
-                    >
-                      ✎
-                    </button>
-                    <button
-                      className="icon-btn"
-                      title="Xóa"
-                      onClick={() => handleDelete(h.id)}
-                    >
-                      🗑
-                    </button>
+                <td>{"★".repeat(h.rating)}</td>
+                <td>
+                  <button onClick={() => handleEdit(h)}>✎</button>
+                  <button onClick={() => handleDelete(h.id)}>🗑</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-
-        {/* PAGINATION FAKE (GIỐNG UI) */}
-        <div className="pagination">
-          <span>Số mục trên mỗi trang:</span>
-          <select>
-            <option>6</option>
-          </select>
-          <span>1-6</span>
-          <span>{"<"}</span>
-          <span>{">"}</span>
-        </div>
       </div>
     </div>
   );

@@ -1,106 +1,39 @@
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 10px 0 12px;
-  color: #2f6bff;
+.booking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
 }
 
-/* search + sort row */
-.top-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.booking-table th,
+.booking-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
 }
 
-.search-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  background: #fff;
-  border-radius: 12px;
-  padding: 12px 14px;
-  border: 1px solid #f0f0f0;
+.booking-table th {
+    background: #f9fafb;
+    font-weight: 600;
 }
 
-.search-icon {
-  margin-right: 10px;
-  opacity: 0.6;
+.badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    text-transform: capitalize;
 }
 
-.hotels-search {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 14px;
+.badge.confirmed {
+    background: #e6fffa;
+    color: #047857;
 }
 
-.sort-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: #444;
+.badge.pending {
+    background: #fff7ed;
+    color: #b45309;
 }
 
-.sort-icon {
-  font-size: 18px;
-}
-
-/* icons row */
-.action-toolbar {
-  margin-top: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.left-icons {
-  display: flex;
-  gap: 10px;
-}
-
-.tool-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
-  background: #fff;
-  cursor: pointer;
-}
-
-.right-filter {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.filter-dropdown {
-  min-width: 130px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
-  background: #fff;
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.btn-add {
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 10px;
-  background: #2f6bff;
-  color: #fff;
-  font-size: 22px;
-  cursor: pointer;
-}
-
-/* header avatar circle */
-.avatar-circle {
-  width: 38px;
-  height: 38px;
-  background: #ddd;
-  border-radius: 50%;
+.badge.cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
 }

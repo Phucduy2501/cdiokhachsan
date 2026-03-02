@@ -27,21 +27,6 @@ const Sidebar = () => {
           <span>Thông Tin Đặt Phòng</span>
         </NavLink>
 
-        <NavLink to="/admin/refund" className="menu-item">
-          <span className="icon">💰</span>
-          <span>Đền bù</span>
-        </NavLink>
-
-        <NavLink to="/admin/consult" className="menu-item">
-          <span className="icon">💬</span>
-          <span>Tư vấn</span>
-        </NavLink>
-
-        <NavLink to="/admin/support" className="menu-item">
-          <span className="icon">❓</span>
-          <span>Hỗ trợ</span>
-        </NavLink>
-
         <NavLink to="/admin/settings" className="menu-item">
           <span className="icon">⚙</span>
           <span>Cài đặt</span>

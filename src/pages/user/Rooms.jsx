@@ -1,29 +1,29 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../../services/supabase";
+import BookingModal from "./BookingModal";
 import "./Rooms.css";
 
 export default function Rooms() {
-  const rooms = [
-    {
-      id: 1,
-      name: "Deluxe Room",
-      guests: 2,
-      price: "1.200.000 VNĐ",
-      img: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      id: 2,
-      name: "Premium Room",
-      guests: 3,
-      price: "1.800.000 VNĐ",
-      img: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1200&auto=format&fit=crop",
-    },
-    {
-      id: 3,
-      name: "Family Room",
-      guests: 4,
-      price: "2.500.000 VNĐ",
-      img: "https://images.unsplash.com/photo-1505692952047-1a78307da8f2?q=80&w=1200&auto=format&fit=crop",
-    },
-  ];
+  const [rooms, setRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      const { data, error } = await supabase
+        .from("rooms")
+        .select("*")
+        .order("price", { ascending: true });
+
+      if (error) {
+        console.error("Fetch rooms error:", error);
+        return;
+      }
+
+      setRooms(data);
+    };
+
+    fetchRooms();
+  }, []);
 
   return (
     <div className="homeContainer roomsPage">
@@ -32,20 +32,38 @@ export default function Rooms() {
       <div className="roomsGrid">
         {rooms.map((room) => (
           <div className="roomCard" key={room.id}>
-            <img src={room.img} alt={room.name} />
+            <img
+              src={room.image_url}
+              alt={room.name}
+            />
 
             <div className="roomBody">
               <h3>{room.name}</h3>
-              <p>{room.guests} người</p>
+              <p>{room.capacity} người</p>
 
               <div className="roomBottom">
-                <span className="roomPrice">{room.price} / đêm</span>
-                <button className="btn btnPrimary">Đặt phòng</button>
+                <span className="roomPrice">
+                  {room.price.toLocaleString()} VNĐ / đêm
+                </span>
+
+                <button
+                  className="btn btnPrimary"
+                  onClick={() => setSelectedRoom(room)}
+                >
+                  Đặt phòng
+                </button>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {selectedRoom && (
+        <BookingModal
+          room={selectedRoom}
+          onClose={() => setSelectedRoom(null)}
+        />
+      )}
     </div>
   );
 }

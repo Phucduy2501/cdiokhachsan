@@ -1,56 +1,29 @@
 import { useEffect, useState } from "react";
-import api from "../../services/api";
+import { supabase } from "../../services/supabase";
 import "./Users.css";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
-  const [openAdd, setOpenAdd] = useState(false);
 
   const currentUser = JSON.parse(localStorage.getItem("user"));
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    role: "user",
-  });
-
   const loadUsers = async () => {
-    const res = await api.get("/users");
-    setUsers(res.data.data);
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, role, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Load users error:", error);
+      return;
+    }
+
+    setUsers(data);
   };
 
   useEffect(() => {
     loadUsers();
   }, []);
-
-  const handleAddUser = async () => {
-    if (!form.name || !form.email) {
-      alert("Vui lòng nhập đủ thông tin");
-      return;
-    }
-
-    await api.post("/users", form);
-    setOpenAdd(false);
-    setForm({ name: "", email: "", role: "user" });
-    loadUsers();
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Xóa người dùng?")) return;
-    await api.delete(`/users/${id}`);
-    loadUsers();
-  };
-
-  const handleEdit = async (u) => {
-    const name = prompt("Tên:", u.name);
-    if (!name) return;
-
-    const role = prompt("Role (admin/user):", u.role);
-    if (!role) return;
-
-    await api.put(`/users/${u.id}`, { name, role });
-    loadUsers();
-  };
 
   return (
     <div className="users-page">
@@ -61,56 +34,37 @@ const Users = () => {
         </div>
       </div>
 
-      <button onClick={() => setOpenAdd(true)}>Thêm người dùng</button>
+      <h2 className="page-title">Danh sách người dùng</h2>
 
-      <table>
+      <table className="users-table">
         <thead>
           <tr>
             <th>Tên</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Hành động</th>
+            <th>Ngày tạo</th>
           </tr>
         </thead>
+
         <tbody>
+          {users.length === 0 && (
+            <tr>
+              <td colSpan="4">Chưa có người dùng</td>
+            </tr>
+          )}
+
           {users.map((u) => (
             <tr key={u.id}>
               <td>{u.name}</td>
               <td>{u.email}</td>
               <td>{u.role}</td>
               <td>
-                <button onClick={() => handleEdit(u)}>✎</button>
-                <button onClick={() => handleDelete(u.id)}>🗑</button>
+                {new Date(u.created_at).toLocaleDateString("vi-VN")}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-      {openAdd && (
-        <div className="modal">
-          <input
-            placeholder="Tên"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <input
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <select
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value })}
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
-
-          <button onClick={handleAddUser}>Lưu</button>
-          <button onClick={() => setOpenAdd(false)}>Hủy</button>
-        </div>
-      )}
     </div>
   );
 };

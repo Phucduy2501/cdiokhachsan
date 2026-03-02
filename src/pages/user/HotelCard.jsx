@@ -1,17 +1,34 @@
+import { useNavigate } from "react-router-dom";
+import "./HotelCard.css";
+
 export default function HotelCard({ hotel }) {
+  const navigate = useNavigate();
+
   return (
-    <article className={`card ${hotel.wide ? "cardWide" : ""}`}>
-      <div className="cardImg">
-        {hotel.price && (
-          <span className="priceTag">{hotel.price}</span>
-        )}
-        <img src={hotel.img} alt={hotel.name} />
+    <div
+      className="hotelCard"
+      onClick={() => navigate(`/hotels/${hotel.id}`)}
+    >
+      <div className="hotelImageWrap">
+        <img
+          src={hotel.image_url}
+          alt={hotel.name}
+          loading="lazy"
+          onError={(e) =>
+            (e.target.src =
+              "https://via.placeholder.com/400x250?text=No+Image")
+          }
+        />
+
+        <span className="hotelPrice">
+          {hotel.price.toLocaleString()} VNĐ
+        </span>
       </div>
 
-      <div className="cardBody">
+      <div className="hotelInfo">
         <h3>{hotel.name}</h3>
         <p>{hotel.location}</p>
       </div>
-    </article>
+    </div>
   );
 }

@@ -71,9 +71,6 @@
     padding-left: 4px;
 }
 
-
-/* TOOLBAR */
-
 .dashboard-toolbar {
     display: flex;
     justify-content: space-between;
@@ -101,9 +98,6 @@
 .toolbar-left input::placeholder {
     color: #94a3b8;
 }
-
-
-/* RIGHT TOOLBAR GROUP */
 
 .toolbar-right {
     display: flex;
@@ -185,9 +179,6 @@
     color: #facc15;
 }
 
-
-/* TABLE CARD */
-
 .table-card {
     background: #fff;
     border-radius: 18px;
@@ -201,9 +192,6 @@
     font-weight: 700;
     font-size: 16px;
 }
-
-
-/* TABLE */
 
 table {
     width: 100%;
@@ -240,9 +228,6 @@ td p {
     color: #94a3b8;
 }
 
-
-/* RATING */
-
 .rating {
     white-space: nowrap;
 }
@@ -254,9 +239,6 @@ td p {
 .star.active {
     color: #facc15;
 }
-
-
-/* ACTIONS */
 
 .actions {
     white-space: nowrap;
@@ -274,9 +256,6 @@ td p {
     opacity: 1;
 }
 
-
-/* PAGINATION */
-
 .pagination {
     display: flex;
     justify-content: flex-end;
@@ -293,9 +272,6 @@ td p {
     border: 1px solid #e2e8f0;
     outline: none;
 }
-
-
-/* MODAL */
 
 .modal-overlay {
     position: fixed;
@@ -355,4 +331,37 @@ td p {
     background: #3b82f6;
     color: white;
     font-weight: 600;
+}
+
+.user-info {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    min-width: 160px;
+    z-index: 999;
+}
+
+.dropdown-item {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background: #f3f4f6;
 }

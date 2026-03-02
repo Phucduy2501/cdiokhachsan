@@ -26,7 +26,19 @@
     gap: 18px;
 }
 
+
+/* Tablet */
+
 @media (max-width: 980px) {
+    .hotelsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+/* Mobile */
+
+@media (max-width: 640px) {
     .hotelsGrid {
         grid-template-columns: 1fr;
     }

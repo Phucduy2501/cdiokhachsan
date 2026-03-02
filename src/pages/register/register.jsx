@@ -20,6 +20,11 @@ function Register() {
       return;
     }
 
+    if (password.length < 6) {
+      alert("Mật khẩu phải ít nhất 6 ký tự");
+      return;
+    }
+
     if (password !== confirmPassword) {
       alert("Mật khẩu không khớp");
       return;
@@ -34,6 +39,7 @@ function Register() {
         data: {
           name,
           phone,
+          role: "guest", 
         },
       },
     });
@@ -41,7 +47,8 @@ function Register() {
     setLoading(false);
 
     if (error) {
-      alert(error.message);
+      console.error("SIGNUP ERROR:", error);
+      alert(error.message || "Đăng ký thất bại");
       return;
     }
 
