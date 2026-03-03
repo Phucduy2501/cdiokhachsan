@@ -41,22 +41,24 @@ export default function Dashboard() {
   };
 
   const loadDashboard = async () => {
-    const { data: usersData } = await supabase.from("profiles").select("*");
+    const { data: usersData } = await supabase.from("users").select("*");
     const { data: roomsData } = await supabase.from("rooms").select("*");
     const { data: bookingsData } = await supabase
       .from("bookings")
       .select(`
         *,
-        rooms(name),
-        profiles(full_name)
+        users(name, email),
+        rooms(name)
       `);
 
     setUsers(usersData || []);
     setRooms(roomsData || []);
     setBookings(bookingsData || []);
+
     generateChart(bookingsData || []);
   };
 
+  // ===== Chart 7 ngày =====
   const generateChart = (data) => {
     const last7Days = [...Array(7)].map((_, i) => {
       const d = new Date();
@@ -79,23 +81,42 @@ export default function Dashboard() {
     window.location.href = "/login";
   };
 
+  // ===== Stats =====
   const totalUsers = users.length;
   const totalRooms = rooms.length;
-  const activeRooms = rooms.filter((r) => r.status === "active").length;
 
-  const todayBookings = bookings.filter((b) => {
-    const today = new Date().toISOString().slice(0, 10);
-    return b.created_at?.slice(0, 10) === today;
-  }).length;
+  const today = new Date().toISOString().slice(0, 10);
+
+  const todayBookings = bookings.filter(
+    (b) => b.created_at?.slice(0, 10) === today
+  ).length;
+
+  const totalRevenue = bookings.reduce(
+    (sum, b) => sum + (b.total_price || 0),
+    0
+  );
+
+  // ===== Room Status Auto Detect =====
+  const currentDate = new Date().toISOString().slice(0, 10);
+
+  const isRoomBooked = (roomId) => {
+    return bookings.some(
+      (b) =>
+        b.room_id === roomId &&
+        b.check_in <= currentDate &&
+        b.check_out >= currentDate
+    );
+  };
 
   const recentActivities = bookings.slice(-5).reverse();
 
   return (
     <div className="dashboard">
 
+      {/* HEADER */}
       <div className="dashboard-header">
         <div>
-          <h3>Xin Chào, {user?.email || "Admin"}</h3>
+          <h3>Xin Chào, {user?.email}</h3>
           <p>Chúc 1 ngày tốt lành</p>
         </div>
 
@@ -124,19 +145,21 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* TOP CARDS */}
       <div className="stats-grid">
         <StatCard title="👤 Tổng User" value={totalUsers} />
         <StatCard title="🛏 Tổng Phòng" value={totalRooms} />
-        <StatCard title="🟢 Phòng hoạt động" value={activeRooms} />
         <StatCard title="📦 Booking hôm nay" value={todayBookings} />
+        <StatCard title="💰 Tổng doanh thu" value={`${totalRevenue.toLocaleString()} VND`} />
       </div>
 
+      {/* CHART */}
       <div className="chart-card">
         <h4>Booking 7 ngày gần nhất</h4>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
             <XAxis dataKey="date" />
-            <YAxis />
+            <YAxis allowDecimals={false} />
             <Tooltip />
             <Line
               type="monotone"
@@ -148,14 +171,21 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
+      {/* BOTTOM */}
       <div className="dashboard-bottom">
 
+        {/* Activity */}
         <div className="activity-card">
           <h4>Hoạt động gần đây</h4>
+
+          {recentActivities.length === 0 && (
+            <p>Chưa có hoạt động nào</p>
+          )}
+
           {recentActivities.map((b) => (
             <div key={b.id} className="activity-item">
               <p>
-                {b.profiles?.full_name || "User"} đặt phòng{" "}
+                {b.users?.name} đặt phòng{" "}
                 <strong>{b.rooms?.name}</strong>
               </p>
               <span>
@@ -165,24 +195,22 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Room Status */}
         <div className="room-status-card">
           <h4>Trạng thái phòng</h4>
-          {rooms.map((r) => (
-            <div key={r.id} className="room-status-item">
-              <span>{r.name}</span>
-              <span
-                className={`badge ${
-                  r.status === "active"
-                    ? "green"
-                    : r.status === "booked"
-                    ? "yellow"
-                    : "red"
-                }`}
-              >
-                {r.status || "inactive"}
-              </span>
-            </div>
-          ))}
+
+          {rooms.map((r) => {
+            const booked = isRoomBooked(r.id);
+
+            return (
+              <div key={r.id} className="room-status-item">
+                <span>{r.name}</span>
+                <span className={`badge ${booked ? "yellow" : "green"}`}>
+                  {booked ? "Đang được đặt" : "Hoạt động"}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
       </div>
