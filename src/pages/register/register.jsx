@@ -15,38 +15,53 @@ function Register() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!name || !email || !phone || !password || !confirmPassword) {
-      alert("Vui lòng nhập đầy đủ thông tin");
-      return;
-    }
+  if (!name || !email || !phone || !password || !confirmPassword) {
+    alert("Vui lòng nhập đầy đủ thông tin");
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      alert("Mật khẩu không khớp");
-      return;
-    }
+  if (password !== confirmPassword) {
+    alert("Mật khẩu không khớp");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    const { error } = await supabase.from("users").insert([
-      {
-        name,
-        email,
-        phone,
-        role: "guest",
-      },
-    ]);
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
+  if (error) {
     setLoading(false);
+    console.log("REGISTER ERROR:", error);
+    alert(error.message);
+    return;
+  }
 
-    if (error) {
-      console.error("REGISTER ERROR:", error);
-      alert("Đăng ký thất bại");
-      return;
-    }
+  const authUser = data.user;
 
-    alert("Đăng ký thành công!");
-    navigate("/login");
-  };
+  const { error: insertError } = await supabase.from("users").insert([
+    {
+      id: authUser.id,
+      name,
+      email,
+      phone,
+      role: "guest",
+    },
+  ]);
+
+  setLoading(false);
+
+  if (insertError) {
+    console.log("INSERT ERROR:", insertError);
+    alert("Tạo hồ sơ thất bại");
+    return;
+  }
+
+  alert("Đăng ký thành công!");
+  navigate("/login");
+};
 
   return (
     <div className="login-container">

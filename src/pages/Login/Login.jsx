@@ -19,7 +19,6 @@ function Login() {
 
     setLoading(true);
 
-    // 1. Login Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -33,14 +32,12 @@ function Login() {
 
     const authUser = data.user;
 
-    // 2. Lấy user trong bảng public.users
     let { data: userRow } = await supabase
       .from("users")
       .select("id, email, name, role")
       .eq("id", authUser.id)
       .maybeSingle();
 
-    // 3. Nếu chưa có → tạo mới
     if (!userRow) {
       const { data: newUser, error: insertError } = await supabase
         .from("users")
@@ -48,7 +45,7 @@ function Login() {
           {
             id: authUser.id,
             email: authUser.email,
-            name: authUser.email.split("@")[0], // 👈 TẠM LẤY TÊN
+            name: authUser.email.split("@")[0], 
             role: "guest",
           },
         ])
@@ -66,10 +63,8 @@ function Login() {
 
     setLoading(false);
 
-    // 4. Lưu localStorage
     localStorage.setItem("user", JSON.stringify(userRow));
 
-    // 5. Điều hướng
     if (userRow.role === "admin") {
       navigate("/admin", { replace: true });
     } else {
