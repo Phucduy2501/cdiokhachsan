@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../../services/supabase";
 import "./BookingModal.css";
 
@@ -7,6 +7,27 @@ export default function BookingModal({ room, onClose }) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const today = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    if (checkIn) {
+      const nextDay = new Date(checkIn);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const formatted = nextDay.toISOString().split("T")[0];
+      setCheckOut(formatted);
+    }
+  }, [checkIn]);
+
+  const nights = useMemo(() => {
+    if (!checkIn || !checkOut) return 0;
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diff = (end - start) / (1000 * 60 * 60 * 24);
+    return diff > 0 ? diff : 0;
+  }, [checkIn, checkOut]);
+
+  const totalPrice = nights * room.price;
 
   return (
     <div className="modalOverlay">
@@ -32,6 +53,7 @@ export default function BookingModal({ room, onClose }) {
               <label>Check in</label>
               <input
                 type="date"
+                min={today}
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
               />
@@ -39,22 +61,37 @@ export default function BookingModal({ room, onClose }) {
               <label>Check out</label>
               <input
                 type="date"
+                min={checkIn || today}
                 value={checkOut}
                 onChange={(e) => setCheckOut(e.target.value)}
               />
+
+              {nights > 0 && (
+                <p className="pricePreview">
+                  {nights} đêm × {room.price.toLocaleString()} VNĐ ={" "}
+                  <b>{totalPrice.toLocaleString()} VNĐ</b>
+                </p>
+              )}
 
               <div className="formActions">
                 <button
                   className="btnPrimary"
                   onClick={() => {
                     if (!checkIn || !checkOut) {
-                      alert("Vui lòng chọn ngày check in / check out");
+                      alert("Vui lòng chọn ngày");
                       return;
                     }
-                    if (checkOut <= checkIn) {
-                      alert("Ngày check out phải sau check in");
+
+                    if (checkIn < today) {
+                      alert("Không thể đặt ngày trong quá khứ");
                       return;
                     }
+
+                    if (nights <= 0) {
+                      alert("Check out phải sau check in ít nhất 1 ngày");
+                      return;
+                    }
+
                     setStep(2);
                   }}
                 >
@@ -75,7 +112,10 @@ export default function BookingModal({ room, onClose }) {
 
               <p>Check in: {checkIn}</p>
               <p>Check out: {checkOut}</p>
-              <p><b>Giá:</b> {room.price}</p>
+              <p>Số đêm: {nights}</p>
+              <p>
+                Tổng tiền: <b>{totalPrice.toLocaleString()} VNĐ</b>
+              </p>
 
               <div className="formActions">
                 <button
@@ -86,28 +126,20 @@ export default function BookingModal({ room, onClose }) {
 
                     const {
                       data: { user },
-                      error: userError,
                     } = await supabase.auth.getUser();
 
-                    if (userError || !user) {
+                    if (!user) {
                       alert("Bạn cần đăng nhập để đặt phòng");
                       setLoading(false);
                       return;
                     }
 
-                    const { data: conflicts, error: conflictError } =
-                      await supabase
-                        .from("bookings")
-                        .select("id")
-                        .eq("room_id", room.id)
-                        .lt("check_in", checkOut)
-                        .gt("check_out", checkIn);
-
-                    if (conflictError && conflictError.code) {
-                      console.error("Conflict error:", conflictError);
-                      alert("Lỗi kiểm tra phòng trống");
-                      return;
-                    }
+                    const { data: conflicts } = await supabase
+                      .from("bookings")
+                      .select("id")
+                      .eq("room_id", room.id)
+                      .lt("check_in", checkOut)
+                      .gt("check_out", checkIn);
 
                     if (conflicts && conflicts.length > 0) {
                       alert("Phòng đã được đặt trong khoảng thời gian này");
@@ -122,6 +154,7 @@ export default function BookingModal({ room, onClose }) {
                         room_id: room.id,
                         check_in: checkIn,
                         check_out: checkOut,
+                        total_price: totalPrice,
                         status: "confirmed",
                       });
 
@@ -153,7 +186,13 @@ export default function BookingModal({ room, onClose }) {
           {step === 3 && (
             <>
               <h3>🎉 Payment Completed</h3>
-              <p>Đặt phòng thành công!</p>
+              <p>
+                Bạn đã đặt <b>{room.name}</b> trong {nights} đêm.
+              </p>
+              <p>
+                Tổng thanh toán:{" "}
+                <b>{totalPrice.toLocaleString()} VNĐ</b>
+              </p>
 
               <div className="formActions">
                 <button className="btnPrimary" onClick={onClose}>

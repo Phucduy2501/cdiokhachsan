@@ -7,8 +7,10 @@ import HotelCard from "./HotelCard";
 import MiniHotelCard from "./MiniHotelCard";
 
 export default function Home() {
-  /* ========= LỰA CHỌN HÀNG ĐẦU (SUPABASE) ========= */
   const [topChoices, setTopChoices] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchTopHotels = async () => {
@@ -24,7 +26,50 @@ export default function Home() {
     fetchTopHotels();
   }, []);
 
-  /* ========= LỰA CHỌN PHỔ BIẾN (8 CÁI – GIỮ NGUYÊN) ========= */
+  const handleSearch = async ({ location, guests }) => {
+    try {
+      setLoading(true);
+      setIsSearching(true);
+
+      const { data, error } = await supabase
+        .from("rooms")
+        .select(`
+          *,
+          hotels (*)
+        `)
+        .not("hotel_id", "is", null)   
+        .gte("capacity", guests);
+
+      if (error) {
+        console.error(error);
+        setSearchResults([]);
+      } else {
+        const hotels = data
+          .map(room => room.hotels)
+          .filter(Boolean); 
+
+        const uniqueHotels = hotels.filter(
+          (hotel, index, self) =>
+            index === self.findIndex(h => h.id === hotel.id)
+        );
+
+        setSearchResults(uniqueHotels);
+      }
+    } catch (err) {
+      console.error(err);
+      setSearchResults([]);
+    } finally {
+      setLoading(false);   
+    }
+  };
+
+  const resetSearch = () => {
+    setIsSearching(false);
+    setSearchResults([]);
+  };
+
+  const hotelsToShow = isSearching ? searchResults : topChoices;
+
   const popular = [
     {
       id: 1,
@@ -79,15 +124,34 @@ export default function Home() {
   return (
     <div className="homePage">
       <main className="homeContainer">
-        <SearchBox />
+
+        <SearchBox onSearch={handleSearch} />
 
         <section className="section">
-          <div className="sectionHead">
-            <h2>Lựa chọn hàng đầu</h2>
+          <div className="sectionHead rowBetween">
+            <h2>
+              {isSearching ? "Kết quả tìm kiếm" : "Lựa chọn hàng đầu"}
+            </h2>
+
+            {isSearching && (
+              <span
+                className="pill"
+                style={{ cursor: "pointer" }}
+                onClick={resetSearch}
+              >
+                Quay lại
+              </span>
+            )}
           </div>
 
+          {loading && <p>Đang tải dữ liệu...</p>}
+
+          {!loading && hotelsToShow.length === 0 && (
+            <p>Không tìm thấy khách sạn phù hợp</p>
+          )}
+
           <div className="gridTop">
-            {topChoices.map((hotel) => (
+            {hotelsToShow.map((hotel) => (
               <HotelCard key={hotel.id} hotel={hotel} />
             ))}
           </div>
@@ -105,6 +169,7 @@ export default function Home() {
             ))}
           </div>
         </section>
+
       </main>
     </div>
   );

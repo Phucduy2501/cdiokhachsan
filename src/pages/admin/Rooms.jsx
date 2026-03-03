@@ -4,10 +4,11 @@ import "./Hotels.css";
 
 const Hotels = () => {
   const [hotels, setHotels] = useState([]);
+  const [search, setSearch] = useState("");
 
   const loadHotels = async () => {
     const res = await api.get("/api/hotels");
-    setHotels(res.data);
+    setHotels(res.data || []);
   };
 
   useEffect(() => {
@@ -18,16 +19,6 @@ const Hotels = () => {
     if (!dateStr) return "—";
     const d = new Date(dateStr);
     return `${d.getDate()} Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`;
-  };
-
-  const getRoleText = (h) => {
-    return "Chủ sở hữu";
-  };
-
-  const getBadgeType = (h) => {
-    if (h.rating >= 5) return "admin";
-    if (h.rating >= 4) return "owner";
-    return "pending";
   };
 
   const handleDelete = async (id) => {
@@ -41,134 +32,100 @@ const Hotels = () => {
     const rating = prompt("Đánh giá (1-5):", hotel.rating);
     if (!name || !rating) return;
 
-    await api.put(`/api/hotels/${hotel.id}`, { name, rating });
+    await api.put(`/api/hotels/${hotel.id}`, {
+      hotel_name: name,
+      rating: Number(rating),
+    });
+
     loadHotels();
   };
 
+  const filteredHotels = hotels.filter((h) =>
+    h.hotel_name?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="hotels-page">
+
       <div className="dashboard-header">
         <div>
-          <h3>Xin Chào, Phúc Duy</h3>
-          <p>Chúc 1 ngày tốt lành</p>
-        </div>
-
-        <div className="user-info">
-          <span className="bell">🔔</span>
-          <span className="divider"></span>
-
-          <img
-            className="avatar"
-            src="/71dbf3f6-ac1b-4262-9312-3016b8c754fc.jpg"
-            alt="avatar"
-          />
-
-          <div className="user-text">
-            <strong>Phúc Duy</strong>
-            <p>Admin</p>
-          </div>
-
-          <span className="caret">▾</span>
+          <h3>Quản lý khách sạn</h3>
+          <p>Danh sách tất cả khách sạn trong hệ thống</p>
         </div>
       </div>
 
       <div className="hotels-toolbar">
-        <input className="hotels-search" placeholder="🔍 Tìm kiếm" />
+        <input
+          className="hotels-search"
+          placeholder="🔍 Tìm khách sạn..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-        <div className="hotels-right">
-          <button className="btn-primary">
-            Thêm chủ sở hữu <span className="plus">+</span>
-          </button>
-
-          <div className="hotels-options">
-            <div className="dropdown">
-              Sắp xếp theo <span className="arrow">▼</span>
-            </div>
-            <div className="dropdown">
-              Tìm kiếm đã lưu <span className="arrow">▼</span>
-            </div>
-            <div className="filter-icon">≡</div>
-          </div>
-
-          <div className="toolbar-stars">
-            {"★★★★★".split("").map((s, i) => (
-              <span key={i} className="star">
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
+        <button className="btn-primary">
+          + Thêm khách sạn
+        </button>
       </div>
 
       <div className="table-card">
-        <h4>Danh Sách Chủ Khách Sạn</h4>
+        <h4>Danh Sách Khách Sạn</h4>
 
         <table>
           <thead>
             <tr>
-              <th>Tên</th>
-              <th></th>
+              <th>Tên khách sạn</th>
+              <th>Chủ sở hữu</th>
               <th>Ngày tạo</th>
-              <th>Vai trò</th>
-              <th>Hoạt động</th>
+              <th>Đánh giá</th>
+              <th>Hành động</th>
             </tr>
           </thead>
 
           <tbody>
-            {hotels.map((h) => {
-              const type = getBadgeType(h);
+            {filteredHotels.map((h) => (
+              <tr key={h.id}>
+                <td>
+                  <strong>{h.hotel_name}</strong>
+                </td>
 
-              return (
-                <tr key={h.id}>
-                  <td>
-                    <strong>{h.owner_name}</strong>
-                    <p>{h.owner_email}</p>
-                  </td>
-                  <td>
-                    <span className={`badge ${type}`}>
-                      {type === "admin"
-                        ? "Quản trị viên cấp"
-                        : type === "owner"
-                        ? "Chủ sở hữu"
-                        : "Chưa xác nhận"}
-                    </span>
-                  </td>
+                <td>
+                  <p>{h.owner_name}</p>
+                  <span className="sub-text">
+                    {h.owner_email}
+                  </span>
+                </td>
 
-                  <td>{formatDateVN(h.created_at)}</td>
+                <td>{formatDateVN(h.created_at)}</td>
 
-                  <td className="role-text">{getRoleText(h)}</td>
+                <td className="rating">
+                  {"★".repeat(h.rating || 0)}
+                </td>
 
-                  <td className="actions">
-                    <button
-                      className="icon-btn"
-                      title="Sửa"
-                      onClick={() => handleEdit(h)}
-                    >
-                      ✎
-                    </button>
-                    <button
-                      className="icon-btn"
-                      title="Xóa"
-                      onClick={() => handleDelete(h.id)}
-                    >
-                      🗑
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
+                <td className="actions">
+                  <button
+                    className="icon-btn"
+                    onClick={() => handleEdit(h)}
+                  >
+                    ✎
+                  </button>
+
+                  <button
+                    className="icon-btn"
+                    onClick={() => handleDelete(h.id)}
+                  >
+                    🗑
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
-        <div className="pagination">
-          <span>Số mục trên mỗi trang:</span>
-          <select>
-            <option>6</option>
-          </select>
-          <span>1-6</span>
-          <span>{"<"}</span>
-          <span>{">"}</span>
-        </div>
+        {filteredHotels.length === 0 && (
+          <div className="empty-state">
+            Không có khách sạn nào
+          </div>
+        )}
       </div>
     </div>
   );

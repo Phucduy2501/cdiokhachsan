@@ -1,209 +1,198 @@
 import { useEffect, useState, useRef } from "react";
-import api from "../../services/api";
+import { supabase } from "../../services/supabase";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import "./Dashboard.css";
 
-const Dashboard = () => {
-  const [hotels, setHotels] = useState([]);
-  const [openAddOwner, setOpenAddOwner] = useState(false);
-  const [openUserMenu, setOpenUserMenu] = useState(false);
+export default function Dashboard() {
+  const [user, setUser] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [openMenu, setOpenMenu] = useState(false);
+
   const menuRef = useRef(null);
 
-  const currentUser = JSON.parse(localStorage.getItem("user")) || {
-    name: "Phúc Duy",
-    role: "Admin",
-  };
-
-  const [ownerForm, setOwnerForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-  });
-
-  const loadHotels = () => {
-    api.get("/api/hotels").then((res) => setHotels(res.data));
-  };
-
   useEffect(() => {
-    loadHotels();
+    loadDashboard();
+    getCurrentUser();
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpenUserMenu(false);
+        setOpenMenu(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
+  const getCurrentUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    setUser(data?.user || null);
+  };
+
+  const loadDashboard = async () => {
+    const { data: usersData } = await supabase.from("profiles").select("*");
+    const { data: roomsData } = await supabase.from("rooms").select("*");
+    const { data: bookingsData } = await supabase
+      .from("bookings")
+      .select(`
+        *,
+        rooms(name),
+        profiles(full_name)
+      `);
+
+    setUsers(usersData || []);
+    setRooms(roomsData || []);
+    setBookings(bookingsData || []);
+    generateChart(bookingsData || []);
+  };
+
+  const generateChart = (data) => {
+    const last7Days = [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toISOString().slice(0, 10);
+    });
+
+    const chart = last7Days.reverse().map((date) => ({
+      date,
+      count: data.filter(
+        (b) => b.created_at?.slice(0, 10) === date
+      ).length,
+    }));
+
+    setChartData(chart);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     window.location.href = "/login";
   };
 
-  const formatDateVN = (dateStr) => {
-    const d = new Date(dateStr);
-    return `${d.getDate()} Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`;
-  };
+  const totalUsers = users.length;
+  const totalRooms = rooms.length;
+  const activeRooms = rooms.filter((r) => r.status === "active").length;
 
-  const handleDelete = (id) => {
-    if (!window.confirm("Xóa khách sạn này?")) return;
-    api.delete(`/api/hotels/${id}`).then(loadHotels);
-  };
+  const todayBookings = bookings.filter((b) => {
+    const today = new Date().toISOString().slice(0, 10);
+    return b.created_at?.slice(0, 10) === today;
+  }).length;
 
-  const handleEdit = (hotel) => {
-    const name = prompt("Tên khách sạn:", hotel.hotel_name);
-    const rating = prompt("Đánh giá (1-5):", hotel.rating);
-    if (!name || !rating) return;
-
-    api.put(`/api/hotels/${hotel.id}`, { name, rating }).then(loadHotels);
-  };
-
-  const handleAddOwner = async () => {
-    const { name, email, phone, password } = ownerForm;
-    if (!name || !email || !phone || !password) {
-      alert("Vui lòng nhập đầy đủ thông tin");
-      return;
-    }
-
-    await api.post("/register", ownerForm);
-    setOpenAddOwner(false);
-    setOwnerForm({ name: "", email: "", phone: "", password: "" });
-    loadHotels();
-  };
+  const recentActivities = bookings.slice(-5).reverse();
 
   return (
     <div className="dashboard">
+
       <div className="dashboard-header">
         <div>
-          <h3>Xin chào, {currentUser.name}</h3>
+          <h3>Xin Chào, {user?.email || "Admin"}</h3>
           <p>Chúc 1 ngày tốt lành</p>
         </div>
 
-        <div className="user-info" ref={menuRef}>
+        <div className="header-right" ref={menuRef}>
           <span className="bell">🔔</span>
-          <span className="divider"></span>
-
-          <img
-            className="avatar"
-            src="/public/71dbf3f6-ac1b-4262-9312-3016b8c754fc.jpg"
-            alt="avatar"
-            onClick={() => setOpenUserMenu(!openUserMenu)}
-          />
 
           <div
-            className="user-text"
-            onClick={() => setOpenUserMenu(!openUserMenu)}
+            className="admin-info"
+            onClick={() => setOpenMenu(!openMenu)}
           >
-            <strong>{currentUser.name}</strong>
-            <p>{currentUser.role}</p>
+            <img
+              src={`https://ui-avatars.com/api/?name=${user?.email}`}
+              alt="avatar"
+            />
+            <div>
+              <strong>{user?.email}</strong>
+              <p>Admin</p>
+            </div>
           </div>
 
-          <span
-            className="caret"
-            onClick={() => setOpenUserMenu(!openUserMenu)}
-          >
-            ▾
-          </span>
-
-          {openUserMenu && (
-            <div className="user-dropdown">
-              <button className="dropdown-item" onClick={handleLogout}>
-                🚪 Đăng xuất
-              </button>
+          {openMenu && (
+            <div className="admin-dropdown">
+              <button onClick={handleLogout}>🚪 Đăng xuất</button>
             </div>
           )}
         </div>
       </div>
 
-      <div className="dashboard-toolbar">
-        <input placeholder="🔍 Tìm kiếm" />
-
-        <button className="btn-primary" onClick={() => setOpenAddOwner(true)}>
-          Thêm chủ sở hữu +
-        </button>
+      <div className="stats-grid">
+        <StatCard title="👤 Tổng User" value={totalUsers} />
+        <StatCard title="🛏 Tổng Phòng" value={totalRooms} />
+        <StatCard title="🟢 Phòng hoạt động" value={activeRooms} />
+        <StatCard title="📦 Booking hôm nay" value={todayBookings} />
       </div>
 
-      {openAddOwner && (
-        <div className="modal-overlay" onClick={() => setOpenAddOwner(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Thêm chủ sở hữu</h3>
+      <div className="chart-card">
+        <h4>Booking 7 ngày gần nhất</h4>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={chartData}>
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="#3b82f6"
+              strokeWidth={3}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
-            <input
-              placeholder="Họ tên"
-              value={ownerForm.name}
-              onChange={(e) =>
-                setOwnerForm({ ...ownerForm, name: e.target.value })
-              }
-            />
-            <input
-              placeholder="Email"
-              value={ownerForm.email}
-              onChange={(e) =>
-                setOwnerForm({ ...ownerForm, email: e.target.value })
-              }
-            />
-            <input
-              placeholder="Số điện thoại"
-              value={ownerForm.phone}
-              onChange={(e) =>
-                setOwnerForm({ ...ownerForm, phone: e.target.value })
-              }
-            />
-            <input
-              type="password"
-              placeholder="Mật khẩu"
-              value={ownerForm.password}
-              onChange={(e) =>
-                setOwnerForm({ ...ownerForm, password: e.target.value })
-              }
-            />
+      <div className="dashboard-bottom">
 
-            <div className="modal-actions">
-              <button onClick={() => setOpenAddOwner(false)}>Hủy</button>
-              <button onClick={handleAddOwner}>Lưu</button>
+        <div className="activity-card">
+          <h4>Hoạt động gần đây</h4>
+          {recentActivities.map((b) => (
+            <div key={b.id} className="activity-item">
+              <p>
+                {b.profiles?.full_name || "User"} đặt phòng{" "}
+                <strong>{b.rooms?.name}</strong>
+              </p>
+              <span>
+                {new Date(b.created_at).toLocaleString()}
+              </span>
             </div>
-          </div>
+          ))}
         </div>
-      )}
 
-      <div className="table-card">
-        <h4>Danh sách khách sạn</h4>
+        <div className="room-status-card">
+          <h4>Trạng thái phòng</h4>
+          {rooms.map((r) => (
+            <div key={r.id} className="room-status-item">
+              <span>{r.name}</span>
+              <span
+                className={`badge ${
+                  r.status === "active"
+                    ? "green"
+                    : r.status === "booked"
+                    ? "yellow"
+                    : "red"
+                }`}
+              >
+                {r.status || "inactive"}
+              </span>
+            </div>
+          ))}
+        </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Chủ KS</th>
-              <th>Tên KS</th>
-              <th>Ngày đăng ký</th>
-              <th>Đánh giá</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {hotels.map((h) => (
-              <tr key={h.id}>
-                <td>
-                  <strong>{h.owner_name}</strong>
-                  <p>{h.owner_email}</p>
-                </td>
-                <td>{h.hotel_name}</td>
-                <td>{formatDateVN(h.created_at)}</td>
-                <td>{"★".repeat(h.rating)}</td>
-                <td>
-                  <button onClick={() => handleEdit(h)}>✎</button>
-                  <button onClick={() => handleDelete(h.id)}>🗑</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
-};
+}
 
-export default Dashboard;
+const StatCard = ({ title, value }) => (
+  <div className="stat-card">
+    <h5>{title}</h5>
+    <h2>{value}</h2>
+  </div>
+);

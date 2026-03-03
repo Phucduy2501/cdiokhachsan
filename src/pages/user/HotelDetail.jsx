@@ -57,14 +57,14 @@ export default function HotelDetail() {
             </span>
           </div>
 
-          {rooms.length > 0 && (
+          {/* {rooms.length > 0 && (
             <button
               className="bookNowBtn"
               onClick={() => setSelectedRoom(rooms[0])}
             >
               Đặt ngay
             </button>
-          )}
+          )} */}
         </div>
       </div>
 

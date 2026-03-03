@@ -1,7 +1,21 @@
+import { useState } from "react";
+
 export default function SearchBox({ onSearch }) {
+  const [location, setLocation] = useState("");
+  const [guests, setGuests] = useState("2");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    onSearch({
+      location,
+      guests: Number(guests),
+    });
+  };
+
   return (
     <section className="search">
-      <form className="searchBox" onSubmit={onSearch}>
+      <form className="searchBox" onSubmit={handleSubmit}>
         <div className="field">
           <span className="icon">📅</span>
           <input placeholder="Kiểm tra phòng trống" />
@@ -9,7 +23,10 @@ export default function SearchBox({ onSearch }) {
 
         <div className="field">
           <span className="icon">👤</span>
-          <select defaultValue="2">
+          <select
+            value={guests}
+            onChange={(e) => setGuests(e.target.value)}
+          >
             <option value="1">1 người</option>
             <option value="2">2 người</option>
             <option value="3">3 người</option>
@@ -19,7 +36,11 @@ export default function SearchBox({ onSearch }) {
 
         <div className="field">
           <span className="icon">📍</span>
-          <input placeholder="Địa điểm" />
+          <input
+            placeholder="Địa điểm"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
         </div>
 
         <button className="btn btnPrimary searchBtn">
