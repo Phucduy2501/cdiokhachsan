@@ -20,11 +20,6 @@ function Register() {
       return;
     }
 
-    if (password.length < 6) {
-      alert("Mật khẩu phải ít nhất 6 ký tự");
-      return;
-    }
-
     if (password !== confirmPassword) {
       alert("Mật khẩu không khớp");
       return;
@@ -32,27 +27,24 @@ function Register() {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          phone,
-          role: "guest", 
-        },
+    const { error } = await supabase.from("users").insert([
+      {
+        name,
+        email,
+        phone,
+        role: "guest",
       },
-    });
+    ]);
 
     setLoading(false);
 
     if (error) {
-      console.error("SIGNUP ERROR:", error);
-      alert(error.message || "Đăng ký thất bại");
+      console.error("REGISTER ERROR:", error);
+      alert("Đăng ký thất bại");
       return;
     }
 
-    alert("Đăng ký thành công! Vui lòng đăng nhập");
+    alert("Đăng ký thành công!");
     navigate("/login");
   };
 
