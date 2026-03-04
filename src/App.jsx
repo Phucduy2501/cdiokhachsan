@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import TawkChat from "./components/TawkChat"; 
 
 import Login from "./pages/Login/Login";
 import Register from "./pages/register/register";
@@ -22,45 +23,45 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <Routes>
-      {/* AUTH */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/password" element={<Password />} />
+    <>
+      <TawkChat />
 
-      {/* ADMIN */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute role="admin">
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="hotels" element={<AdminHotels />} />
-        <Route path="bookings" element={<Bookings />} />
-        <Route path="users" element={<Users />} />
-      </Route>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/password" element={<Password />} />
 
-      {/* USER */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/home" element={<Home />} />
-        <Route path="/hotels" element={<UserHotels />} />
-        <Route path="/hotels/:id" element={<HotelDetail />} />
-        <Route path="/rooms" element={<Rooms />} />
-        <Route path="/about" element={<About />} />
-      </Route>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="hotels" element={<AdminHotels />} />
+          <Route path="bookings" element={<Bookings />} />
+          <Route path="users" element={<Users />} />
+        </Route>
 
-      {/* ROOT */}
-      <Route path="/" element={<Navigate to="/home" replace />} />
-    </Routes>
+        <Route
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/home" element={<Home />} />
+          <Route path="/hotels" element={<UserHotels />} />
+          <Route path="/hotels/:id" element={<HotelDetail />} />
+          <Route path="/rooms" element={<Rooms />} />
+          <Route path="/about" element={<About />} />
+        </Route>
+
+        <Route path="/" element={<Navigate to="/home" replace />} />
+      </Routes>
+    </>
   );
 }
 

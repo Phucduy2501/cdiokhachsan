@@ -96,6 +96,8 @@
   border-radius: 8px;
   font-size: 12px;
   color: white;
+    margin-left: 20px;
+    margin-bottom: 20px;
 }
 
 .green { background: #16a34a; }

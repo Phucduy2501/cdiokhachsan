@@ -1,8 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "../../services/supabase";
+import { sendBookingToChat } from "../../services/chatService";
 import "./BookingModal.css";
 
 export default function BookingModal({ room, onClose }) {
+
   const [step, setStep] = useState(1);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -21,16 +23,21 @@ export default function BookingModal({ room, onClose }) {
 
   const nights = useMemo(() => {
     if (!checkIn || !checkOut) return 0;
+
     const start = new Date(checkIn);
     const end = new Date(checkOut);
+
     const diff = (end - start) / (1000 * 60 * 60 * 24);
+
     return diff > 0 ? diff : 0;
+
   }, [checkIn, checkOut]);
 
   const totalPrice = nights * room.price;
 
   return (
     <div className="modalOverlay">
+
       <div className="modalContent bookingLayout">
 
         <div className="bookingImage">
@@ -74,9 +81,11 @@ export default function BookingModal({ room, onClose }) {
               )}
 
               <div className="formActions">
+
                 <button
                   className="btnPrimary"
                   onClick={() => {
+
                     if (!checkIn || !checkOut) {
                       alert("Vui lòng chọn ngày");
                       return;
@@ -93,6 +102,7 @@ export default function BookingModal({ room, onClose }) {
                     }
 
                     setStep(2);
+
                   }}
                 >
                   Book Now
@@ -101,6 +111,7 @@ export default function BookingModal({ room, onClose }) {
                 <button className="btnCancel" onClick={onClose}>
                   Cancel
                 </button>
+
               </div>
             </>
           )}
@@ -113,15 +124,18 @@ export default function BookingModal({ room, onClose }) {
               <p>Check in: {checkIn}</p>
               <p>Check out: {checkOut}</p>
               <p>Số đêm: {nights}</p>
+
               <p>
                 Tổng tiền: <b>{totalPrice.toLocaleString()} VNĐ</b>
               </p>
 
               <div className="formActions">
+
                 <button
                   className="btnPrimary"
                   disabled={loading}
                   onClick={async () => {
+
                     setLoading(true);
 
                     const {
@@ -129,9 +143,13 @@ export default function BookingModal({ room, onClose }) {
                     } = await supabase.auth.getUser();
 
                     if (!user) {
+
                       alert("Bạn cần đăng nhập để đặt phòng");
+
                       setLoading(false);
+
                       return;
+
                     }
 
                     const { data: conflicts } = await supabase
@@ -142,9 +160,13 @@ export default function BookingModal({ room, onClose }) {
                       .gt("check_out", checkIn);
 
                     if (conflicts && conflicts.length > 0) {
+
                       alert("Phòng đã được đặt trong khoảng thời gian này");
+
                       setLoading(false);
+
                       return;
+
                     }
 
                     const { error } = await supabase
@@ -159,14 +181,32 @@ export default function BookingModal({ room, onClose }) {
                       });
 
                     if (error) {
+
                       console.error(error);
+
                       alert("Đặt phòng thất bại");
+
                       setLoading(false);
+
                       return;
+
                     }
 
+                    setTimeout(() => {
+
+                      sendBookingToChat({
+                        room: room.name,
+                        checkin: checkIn,
+                        checkout: checkOut,
+                        total: totalPrice.toLocaleString() + " VNĐ"
+                      });
+
+                    }, 500);
+
                     setLoading(false);
+
                     setStep(3);
+
                   }}
                 >
                   {loading ? "Processing..." : "Pay Now"}
@@ -179,6 +219,7 @@ export default function BookingModal({ room, onClose }) {
                 >
                   Back
                 </button>
+
               </div>
             </>
           )}
@@ -186,24 +227,32 @@ export default function BookingModal({ room, onClose }) {
           {step === 3 && (
             <>
               <h3>🎉 Payment Completed</h3>
+
               <p>
                 Bạn đã đặt <b>{room.name}</b> trong {nights} đêm.
               </p>
+
               <p>
-                Tổng thanh toán:{" "}
-                <b>{totalPrice.toLocaleString()} VNĐ</b>
+                Tổng thanh toán: <b>{totalPrice.toLocaleString()} VNĐ</b>
               </p>
 
               <div className="formActions">
-                <button className="btnPrimary" onClick={onClose}>
+
+                <button
+                  className="btnPrimary"
+                  onClick={onClose}
+                >
                   Hoàn tất
                 </button>
+
               </div>
             </>
           )}
 
         </div>
+
       </div>
+
     </div>
   );
 }

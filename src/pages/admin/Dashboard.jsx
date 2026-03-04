@@ -58,22 +58,28 @@ export default function Dashboard() {
     generateChart(bookingsData || []);
   };
 
-  // ===== Chart 7 ngày =====
   const generateChart = (data) => {
-    const last7Days = [...Array(7)].map((_, i) => {
+
+    const days = [];
+
+    for (let i = 6; i >= 0; i--) {
+
       const d = new Date();
       d.setDate(d.getDate() - i);
-      return d.toISOString().slice(0, 10);
-    });
 
-    const chart = last7Days.reverse().map((date) => ({
-      date,
-      count: data.filter(
-        (b) => b.created_at?.slice(0, 10) === date
-      ).length,
-    }));
+      const dateStr = d.toISOString().slice(0,10);
 
-    setChartData(chart);
+      const count = data.filter((b) => b.check_in === dateStr).length;
+
+      days.push({
+        date: dateStr,
+        count
+      });
+
+    }
+
+    setChartData(days);
+
   };
 
   const handleLogout = async () => {
@@ -81,14 +87,13 @@ export default function Dashboard() {
     window.location.href = "/login";
   };
 
-  // ===== Stats =====
   const totalUsers = users.length;
   const totalRooms = rooms.length;
 
   const today = new Date().toISOString().slice(0, 10);
 
   const todayBookings = bookings.filter(
-    (b) => b.created_at?.slice(0, 10) === today
+    (b) => b.check_in === today
   ).length;
 
   const totalRevenue = bookings.reduce(
@@ -96,7 +101,6 @@ export default function Dashboard() {
     0
   );
 
-  // ===== Room Status Auto Detect =====
   const currentDate = new Date().toISOString().slice(0, 10);
 
   const isRoomBooked = (roomId) => {
@@ -113,7 +117,6 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
 
-      {/* HEADER */}
       <div className="dashboard-header">
         <div>
           <h3>Xin Chào, {user?.email}</h3>
@@ -145,7 +148,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* TOP CARDS */}
       <div className="stats-grid">
         <StatCard title="👤 Tổng User" value={totalUsers} />
         <StatCard title="🛏 Tổng Phòng" value={totalRooms} />
@@ -153,7 +155,6 @@ export default function Dashboard() {
         <StatCard title="💰 Tổng doanh thu" value={`${totalRevenue.toLocaleString()} VND`} />
       </div>
 
-      {/* CHART */}
       <div className="chart-card">
         <h4>Booking 7 ngày gần nhất</h4>
         <ResponsiveContainer width="100%" height={300}>
@@ -171,10 +172,8 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* BOTTOM */}
       <div className="dashboard-bottom">
 
-        {/* Activity */}
         <div className="activity-card">
           <h4>Hoạt động gần đây</h4>
 
@@ -195,7 +194,6 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Room Status */}
         <div className="room-status-card">
           <h4>Trạng thái phòng</h4>
 
